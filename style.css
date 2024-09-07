@@ -1,0 +1,28 @@
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    color:rgb(6, 134, 247)
+}
+
+#footer1 {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    color:rgb(0, 0, 0)
+}
+
+#canvas {
+    position: fixed;
+    background-color: rgb(255, 255, 255);
+    border: 4px solid rgb(0, 0, 0);
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px;
+
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
