@@ -14,7 +14,7 @@ let dx = boxSize;
 let dy = 0;
 
 // Maximala längden på ormen, sätts till ett stort värde för att det ska vara "oändligt"
-const maxLength = 1;
+const maxLength = 8;
 
 // Lägg till startpositionen i ormen
 snake.push({ x: x, y: y });
@@ -45,16 +45,16 @@ function update() {
 
 // Funktion för att kontrollera tangenttryckningar och ändra riktning
 function changeDirection(event) {
-    if (event.key === "ArrowUp" && dy === 0) {
+    if (event.key === "w" && dy === 0) {
         dx = 0;
         dy = -boxSize;
-    } else if (event.key === "ArrowDown" && dy === 0) {
+    } else if (event.key === "s"  && dy === 0) {
         dx = 0;
         dy = boxSize;
-    } else if (event.key === "ArrowLeft" && dx === 0) {
+    } else if (event.key === "a" && dx === 0) {
         dx = -boxSize;
         dy = 0;
-    } else if (event.key === "ArrowRight" && dx === 0) {
+    } else if (event.key === "d" && dx === 0) {
         dx = boxSize;
         dy = 0;
     }
@@ -62,6 +62,10 @@ function changeDirection(event) {
 
 // Lyssna på tangenttryckningar för att ändra riktning
 document.addEventListener("keydown", changeDirection);
+
+// Starta en loop som uppdaterar spelet varje 100 millisekunder
+setInterval(update, 100);
+
 
 // Starta en loop som uppdaterar spelet varje 100 millisekunder
 setInterval(update, 100);
