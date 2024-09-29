@@ -8,17 +8,20 @@
 </head>
 <body>
     <h1>Gymnasiearbete-Snake</h1>
-    <p id="p1">Score: </p>
-    <p id="p2">Highscore: </p>
-        <canvas id="canvas" width="500" height="320">
+   
+    <div class="scores">
+        <p>Score: <span id="score">0</span></p>
+        <p>Highscore: <span id="highscore">0</span></p>
+    </div>
+        <canvas id="canvas" width="600" height="420">
         </canvas>
 
-
     <footer id="footer">
-        <p id="footer1">Skapare: Daniel Oshana och Oscar Jelksäter</P>  
+        <p id="footer1">Skapare: Daniel Oshana och Oscar Jelksäter</p>  
     </footer>
     
-    <script src="snake.js"></script> 
+    <script src="snake.js"defer></script>
+    <script src="fruit.js"defer></script> 
 
 </body>
 </html>
