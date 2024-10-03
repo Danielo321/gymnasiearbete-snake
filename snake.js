@@ -20,7 +20,7 @@ let dx = boxSize;
 let dy = 0;
 
 // Maximala längden på ormen
-const maxLength = 10;
+const maxLength = 5;
 
 // Fruktens position (rättad slumpmässig position)
 let fruit = {
@@ -43,6 +43,17 @@ function resetGame() {
     dy = 0;
 }
 
+// Funktion för självkollision
+function selfCollision(snakehead) {
+    for (let i = 0; i < snake.length - 1; i++) {
+        if (snakehead.x === snake[i].x && snakehead.y === snake[i].y) {
+            resetGame(); // Återställ spelet om en kollision upptäcks
+            return true;
+        }
+    }
+    return false; // Ingen kollision upptäckt
+}
+
 // Funktionen som uppdaterar spelet varje gång
 function update() {
     // Uppdatera ormens position
@@ -53,6 +64,14 @@ function update() {
     if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
         resetGame(); // Återställ spelet om ormen träffar en vägg
         return; // Avsluta funktionen så att inget mer ritas ut efter kollision
+    }
+
+    // Skapa en ny huvudposition
+    let snakehead = { x: x, y: y };
+
+    // Kolla om ormen träffar sig själv
+    if (selfCollision(snakehead)) {
+        return;  // Om kollision sker, avsluta funktionen för att förhindra fortsatt uppdatering
     }
 
     // Kolla om ormen träffar frukten
@@ -77,7 +96,7 @@ function update() {
     }
 
     // Lägg till den nya positionen till ormen
-    snake.push({ x: x, y: y });
+    snake.push(snakehead);
 
     // Rensa canvas för att kunna rita om
     ctx.clearRect(0, 0, canvas.width, canvas.height);
