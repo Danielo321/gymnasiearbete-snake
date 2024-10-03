@@ -22,11 +22,29 @@ let dy = 0;
 // Maximala längden på ormen
 const maxLength = 5;
 
-// Fruktens position (rättad slumpmässig position)
+// Fruktens position
 let fruit = {
     x: Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize,
     y: Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize,
 };
+
+// Funktion för att slumpa en ny position för frukten
+function placeFruit() {
+    let validPosition = false;
+
+    while (!validPosition) {
+        fruit.x = Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize;
+        fruit.y = Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize;
+
+        validPosition = true; // Anta att positionen är giltig
+        for (let i = 0; i < snake.length; i++) {
+            if (snake[i].x === fruit.x && snake[i].y === fruit.y) {
+                validPosition = false; // Positionen är inte giltig om den ligger på ormen
+                break; // Avbryt loopen
+            }
+        }
+    }
+}
 
 // Lägg till startpositionen i ormen
 snake.push({ x: x, y: y });
@@ -71,23 +89,22 @@ function update() {
 
     // Kolla om ormen träffar sig själv
     if (selfCollision(snakehead)) {
-        return;  // Om kollision sker, avsluta funktionen för att förhindra fortsatt uppdatering
+        return; // Om kollision sker, avsluta funktionen för att förhindra fortsatt uppdatering
     }
 
     // Kolla om ormen träffar frukten
     if (x === fruit.x && y === fruit.y) {
         score++; // Öka poängen
         scoreElement.textContent = score; // Uppdatera poängen i HTML
-        
+
         // Kontrollera och uppdatera highscore
         if (score > highscore) {
             highscore = score;
             highScoreElement.textContent = highscore; // Uppdatera highscore i HTML
         }
 
-        // Slumpa ny fruktposition
-        fruit.x = Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize;
-        fruit.y = Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize;
+        // Placera frukten på en ny position
+        placeFruit(); // Använd vår nya funktion
     } else {
         // Ta bort det äldsta blocket om ormen inte äter frukten
         if (snake.length >= maxLength) {
