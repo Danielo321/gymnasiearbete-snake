@@ -28,6 +28,10 @@ let fruit = {
     y: Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize,
 };
 
+// Ladda bilden för frukten
+let fruitImage = new Image();
+fruitImage.src = "äpplebildnya.png"; // Kontrollera att bilden finns i rätt mapp
+
 // Funktion för att slumpa en ny position för frukten
 function placeFruit() {
     let validPosition = false;
@@ -61,6 +65,38 @@ function resetGame() {
     dy = 0;
 }
 
+// Skapa en variabel för att lagra starttiden
+let startTime = new Date();
+
+// Skapa en variabel för att lagra interval-ID:t
+let intervalId;
+
+// Funktion som körs varje sekund
+function timerFunction() {
+  // Beräkna tiden som har gått sedan starten
+  let elapsedTime = new Date() - startTime;
+  
+  // Gör något med tiden, t.ex. logga den till konsolen
+  console.log(`Speltid: ${elapsedTime / 1000} sekunder`);
+}
+
+// Starta timern
+intervalId = setInterval(timerFunction, 1000);
+
+// Funktion som körs när spelet stoppas
+function gameOver() {
+  // Stoppa timern
+  clearInterval(intervalId);
+  
+  // Återställ startTime till den aktuella tiden
+  startTime = new Date();
+  console.log("startTime återställd till:", startTime);
+  
+  // Starta en ny timer
+  intervalId = setInterval(timerFunction, 1000);
+}
+
+
 // Funktion för självkollision
 function selfCollision(snakehead) {
     for (let i = 0; i < snake.length - 1; i++) {
@@ -69,7 +105,7 @@ function selfCollision(snakehead) {
             return true;
         }
     }
-    return false; // Ingen kollision upptäckt
+    return false; // Ingen kollision upptäckt  
 }
 
 // Funktionen som uppdaterar spelet varje gång
@@ -120,13 +156,12 @@ function update() {
 
     // Rita alla block i ormen
     for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "green";
         ctx.fillRect(snake[i].x, snake[i].y, boxSize, boxSize); // Rita blocken
     }
 
-    // Rita frukten
-    ctx.fillStyle = "red";
-    ctx.fillRect(fruit.x, fruit.y, boxSize, boxSize);
+    // Rita frukten med bilden
+    ctx.drawImage(fruitImage, fruit.x, fruit.y,boxSize, boxSize);
 }
 
 // Funktion för att kontrollera tangenttryckningar och ändra riktning
