@@ -237,8 +237,8 @@ function changeDirection(event) {
 // Lyssna på tangenttryckningar för att ändra riktning
 document.addEventListener("keydown", changeDirection);
 
-// Starta en loop som uppdaterar spelet varje 200 millisekunder
-setInterval(update, 100);
 
 
-//IDÈ Ormen blir röd när den käkar chilin // 
+//IDÈER//
+//Ormen blir röd när den käkar chilin//
+//Ny power-up som gör så att frukterna rör sig, dubbla poäng ifall fångade. Varar 5-10 sekunder.//
