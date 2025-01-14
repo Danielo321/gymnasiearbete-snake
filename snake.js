@@ -1,170 +1,199 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
-// Hämta score- och highscore-element från HTML
+// Score and highscore HTML elements
 let scoreElement = document.getElementById("score");
 let highScoreElement = document.getElementById("highscore");
 
-// Konstant boxstorlek och ormen är en array
 const boxSize = 20;
-let snake = [];
+let snake = [{ x: 0, y: 0 }];
 let score = 0;
-let highscore = 0; // Variabel för highscore
-
-// Startposition för ormen
+let highscore = 0;
 let x = 0;
 let y = 0;
-
-// Hur ormen ska röra sig
 let dx = boxSize;
 let dy = 0;
-
-// Maximala längden på ormen
 const maxLength = 5;
+let gameSpeed = 100; // Uppdateringshastighet i millisekunder
+let gameInterval;
 
-// Fruktens position
+// Fruit properties
 let fruit = {
     x: Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize,
     y: Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize,
 };
 
-// Ladda bilden för frukten
 let fruitImage = new Image();
-fruitImage.src = "äpplebildnya.png"; // Kontrollera att bilden finns i rätt mapp
+fruitImage.src = "Bilder/äpplebildnya.png"; // Se till att bilden finns i mappen
 
-// Funktion för att slumpa en ny position för frukten
-function placeFruit() {
+// Chili Power-up
+let chili = {
+    x: Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize,
+    y: Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize,
+    active: false
+};
+
+let chiliImage = new Image();
+chiliImage.src = "Bilder/chilipepper2d-500px.png"; // Lägg till en bild för chilin
+
+// Timer variables
+let startTime;
+let intervalId;
+
+// Startar timern
+function startTimer() {
+    startTime = new Date();
+    intervalId = setInterval(timerFunction, 1000);
+}
+
+// Stoppar timern och returnerar förfluten tid i sekunder
+function stopTimer() {
+    clearInterval(intervalId);
+    let elapsedTime = new Date() - startTime;
+    return elapsedTime / 1000;
+}
+
+// Loggar tiden varje sekund (valfritt för debugging)
+function timerFunction() {
+    let elapsedTime = new Date() - startTime;
+    console.log(`Elapsed time: ${elapsedTime / 1000} seconds`);
+}
+
+// Slumpmässig placering av objekt på spelplanen
+function placeObject(object) {
     let validPosition = false;
-
     while (!validPosition) {
-        fruit.x = Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize;
-        fruit.y = Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize;
-
-        validPosition = true; // Anta att positionen är giltig
+        object.x = Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize;
+        object.y = Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize;
+        validPosition = true;
         for (let i = 0; i < snake.length; i++) {
-            if (snake[i].x === fruit.x && snake[i].y === fruit.y) {
-                validPosition = false; // Positionen är inte giltig om den ligger på ormen
-                break; // Avbryt loopen
+            if (snake[i].x === object.x && snake[i].y === object.y) {
+                validPosition = false;
+                break;
             }
         }
     }
 }
 
-// Lägg till startpositionen i ormen
-snake.push({ x: x, y: y });
-
-// Funktionen som återställer spelet vid kollision
+// Starta om spelet
 function resetGame() {
-    alert("Game over!"); // Visa ett meddelande vid kollision
-    score = 0; // Återställ poängen
-    scoreElement.textContent = score; // Återställ poängen i HTML
-    snake = [{ x: 0, y: 0 }]; // Återställ ormen till startpositionen
+    let finalTime = stopTimer();
+    let gameData = {
+        time: finalTime,
+        score: score,
+        highscore: highscore,
+        date: new Date().toLocaleString(),
+        note: "Great game! Keep improving!"
+    };
+
+    fetch('http://localhost:3000/save-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(gameData),
+    })
+    .then(response => response.text())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+
+    score = 0;
+    scoreElement.textContent = score;
+    snake = [{ x: 0, y: 0 }];
     x = 0;
     y = 0;
     dx = boxSize;
     dy = 0;
+    gameSpeed = 100; // Återställ hastigheten
+    clearInterval(gameInterval);
+    gameInterval = setInterval(update, gameSpeed);
+    
+    placeObject(fruit);
+    placeObject(chili);
+    startTimer();
 }
 
-// Skapa en variabel för att lagra starttiden
-let startTime = new Date();
-
-// Skapa en variabel för att lagra interval-ID:t
-let intervalId;
-
-// Funktion som körs varje sekund
-function timerFunction() {
-  // Beräkna tiden som har gått sedan starten
-  let elapsedTime = new Date() - startTime;
-  
-  // Gör något med tiden, t.ex. logga den till konsolen
-  console.log(`Speltid: ${elapsedTime / 1000} sekunder`);
-}
-
-// Starta timern
-intervalId = setInterval(timerFunction, 1000);
-
-// Funktion som körs när spelet stoppas
-function gameOver() {
-  // Stoppa timern
-  clearInterval(intervalId);
-  
-  // Återställ startTime till den aktuella tiden
-  startTime = new Date();
-  console.log("startTime återställd till:", startTime);
-  
-  // Starta en ny timer
-  intervalId = setInterval(timerFunction, 1000);
-}
-
-
-// Funktion för självkollision
+// Kollar om ormen krockar med sig själv
 function selfCollision(snakehead) {
     for (let i = 0; i < snake.length - 1; i++) {
         if (snakehead.x === snake[i].x && snakehead.y === snake[i].y) {
-            resetGame(); // Återställ spelet om en kollision upptäcks
+            resetGame();
             return true;
         }
     }
-    return false; // Ingen kollision upptäckt  
+    return false;
 }
 
-// Funktionen som uppdaterar spelet varje gång
+// Uppdaterar spelet varje frame
 function update() {
-    // Uppdatera ormens position
+    if (!intervalId) startTimer();
+
     x += dx;
     y += dy;
 
-    // Kolla om ormen träffar en vägg
+    // Väggkollision
     if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) {
-        resetGame(); // Återställ spelet om ormen träffar en vägg
-        return; // Avsluta funktionen så att inget mer ritas ut efter kollision
+        resetGame();
+        return;
     }
 
-    // Skapa en ny huvudposition
     let snakehead = { x: x, y: y };
 
-    // Kolla om ormen träffar sig själv
-    if (selfCollision(snakehead)) {
-        return; // Om kollision sker, avsluta funktionen för att förhindra fortsatt uppdatering
-    }
+    // Självkollision
+    if (selfCollision(snakehead)) return;
 
-    // Kolla om ormen träffar frukten
+    // Om ormen äter frukten
     if (x === fruit.x && y === fruit.y) {
-        score++; // Öka poängen
-        scoreElement.textContent = score; // Uppdatera poängen i HTML
+        score++;
+        scoreElement.textContent = score;
 
-        // Kontrollera och uppdatera highscore
         if (score > highscore) {
             highscore = score;
-            highScoreElement.textContent = highscore; // Uppdatera highscore i HTML
+            highScoreElement.textContent = highscore;
         }
 
-        // Placera frukten på en ny position
-        placeFruit(); // Använd vår nya funktion
+        placeObject(fruit);
     } else {
-        // Ta bort det äldsta blocket om ormen inte äter frukten
-        if (snake.length >= maxLength) {
-            snake.shift();
+        if (snake.length >= maxLength) snake.shift();
+    }
+
+    // Om ormen äter chilin
+    if (x === chili.x && y === chili.y) {
+        chili.active = true;
+        placeObject(chili);
+        
+        // Öka hastigheten temporärt
+        if (!chili.active) {
+            clearInterval(gameInterval);
+            gameSpeed = 50;
+            gameInterval = setInterval(update, gameSpeed);
+
+            // Återställ hastigheten efter 5 sekunder
+            setTimeout(() => {
+                gameSpeed = 100;
+                clearInterval(gameInterval);
+                gameInterval = setInterval(update, gameSpeed);
+                chili.active = false;
+            }, 5000);
         }
     }
 
-    // Lägg till den nya positionen till ormen
     snake.push(snakehead);
 
-    // Rensa canvas för att kunna rita om
+    // Rensa canvas och rita ormen, frukten och chilin
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Rita alla block i ormen
     for (let i = 0; i < snake.length; i++) {
         ctx.fillStyle = "green";
-        ctx.fillRect(snake[i].x, snake[i].y, boxSize, boxSize); // Rita blocken
+        ctx.fillRect(snake[i].x, snake[i].y, boxSize, boxSize);
     }
 
-    // Rita frukten med bilden
-    ctx.drawImage(fruitImage, fruit.x, fruit.y,boxSize, boxSize);
+    ctx.drawImage(fruitImage, fruit.x, fruit.y, boxSize, boxSize);
+    
+    if (chili.active) {
+        ctx.drawImage(chiliImage, chili.x, chili.y, boxSize*3, boxSize*3);
+    }
 }
 
-// Funktion för att kontrollera tangenttryckningar och ändra riktning
+// Byt riktning på ormen
 function changeDirection(event) {
     if (event.key === "w" && dy === 0) {
         dx = 0;
@@ -181,8 +210,7 @@ function changeDirection(event) {
     }
 }
 
-// Lyssna på tangenttryckningar för att ändra riktning
 document.addEventListener("keydown", changeDirection);
 
-// Starta en loop som uppdaterar spelet varje 100 millisekunder
-setInterval(update, 100);
+// Starta spelet med första intervallen
+gameInterval = setInterval(update, gameSpeed);
