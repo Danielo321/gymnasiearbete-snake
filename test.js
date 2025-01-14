@@ -22,19 +22,29 @@ let dy = 0;
 // Maximala längden på ormen
 const maxLength = 5;
 
-// Bilden på Powerup-frukten
-let powerFruitImage = new Image();
-powerFruitImage.src = "chilipixel3.png";
+// Bilden på Powerup-chilifrukten
+let powerChiliImage = new Image();
+powerChiliImage.src = "chilipixel3.png";
+
+// Bilden på Powerup-vattenmelonfrukten
+let powerMelonImage = new Image();
+powerMelonImage.src = "pixelwatermelon.png";
 
 // Bilden på frukten
 let fruitImage = new Image();
-fruitImage.src = "pixelwatermelon.png";
+fruitImage.src = "äpple-bild.png";
 
 // Variabeln för spel-intervallet som bestämmer hur snabt ormen åker
 interval = 100
 
-// Powerup-Fruktens position
-let powerFruit = {
+// Powerup-MelonFruktens position
+let powerMelonFruit = {
+    x: Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize,
+    y: Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize,
+};
+
+// Powerup-ChiliFruktens position
+let powerChiliFruit = {
     x: Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize,
     y: Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize,
 };
@@ -69,16 +79,35 @@ function powerupOut() {
 startGameInterval();
 
 // Funktion för att slumpa en ny position för Powerup-frukten
-function placePowerFruit() {
+function placePowerMelonFruit() {
     let validPosition = false;
 
     while (!validPosition) {
-        powerFruit.x = Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize;
-        powerFruit.y = Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize;
+        powerMelonFruit.x = Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize;
+        powerMelonFruit.y = Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize;
 
         validPosition = true; // Anta att positionen är giltig
         for (let i = 0; i < snake.length; i++) {
-            if (snake[i].x === powerFruit.x && snake[i].y === powerFruit.y) {
+            if (snake[i].x === powerMelonFruit.x && snake[i].y === powerMelonFruit.y) {
+                validPosition = false; // Positionen är inte giltig om den ligger på ormen
+                break; // Avbryt loopen
+
+            }
+        }
+    }
+}
+
+// Funktion för att slumpa en ny position för Powerup-frukten
+function placePowerChiliFruit() {
+    let validPosition = false;
+
+    while (!validPosition) {
+        powerChiliFruit.x = Math.floor(Math.random() * (canvas.width / boxSize)) * boxSize;
+        powerChiliFruit.y = Math.floor(Math.random() * (canvas.height / boxSize)) * boxSize;
+
+        validPosition = true; // Anta att positionen är giltig
+        for (let i = 0; i < snake.length; i++) {
+            if (snake[i].x === powerChiliFruit.x && snake[i].y === powerChiliFruit.y) {
                 validPosition = false; // Positionen är inte giltig om den ligger på ormen
                 break; // Avbryt loopen
 
@@ -152,8 +181,8 @@ function update() {
         return; // Om kollision sker, avsluta funktionen för att förhindra fortsatt uppdatering
     }
 
-    // Kolla om ormen träffar Powerup-frukten
-    if (x === powerFruit.x && y === powerFruit.y) {
+    // Kolla om ormen träffar Powerup-Chilin
+    if (x === powerChiliFruit.x && y === powerChiliFruit.y) {
         score++; // Öka poängen
         scoreElement.textContent = score; // Uppdatera poängen i HTML
 
@@ -170,7 +199,7 @@ function update() {
         }
 
         // Placera Powerup-frukten på en ny position
-        placePowerFruit(); // Använd vår nya funktion
+        placePowerChiliFruit(); // Använd vår nya funktion
     } else {
         // Ta bort det äldsta blocket om ormen inte äter frukten
         if (snake.length >= maxLength) {
@@ -198,6 +227,26 @@ function update() {
         }
     }
 
+    // Kolla om ormen träffar Powerup-Melonen
+    if (x === powerMelonFruit.x && y === powerMelonFruit.y) {
+        score++; //Öka poängen
+        scoreElement.textContent = score; //Uppdatera poängen i HTML
+
+        // Kontrollera och uppdatera highscore
+        if (score > highscore) {
+            highscore = score;
+            highScoreElement.textContent = highscore; // Uppdatera highscore i HTML
+        }
+
+        // Placera Powerup-Melonen på en ny position
+        placePowerMelonFruit(); //Använd vår nya funktion
+    } else {
+        // Ta bort det äldsta blocket om ormen inte äter frukten
+        if (snake.length >= maxLength) {
+            snake.shift();
+        }
+    }
+
     // Lägg till den nya positionen till ormen
     snake.push(snakehead);
 
@@ -206,15 +255,18 @@ function update() {
 
     // Rita alla block i ormen
     for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "green";
         ctx.fillRect(snake[i].x, snake[i].y, boxSize, boxSize); // Rita blocken
     }
 
     // Rita Power-up frukten
-    ctx.drawImage(powerFruitImage, powerFruit.x, powerFruit.y,boxSize, boxSize);
+    ctx.drawImage(powerChiliImage, powerChiliFruit.x, powerChiliFruit.y,boxSize, boxSize);
 
-    // Rita Power-up frukten
+    // Rita frukten
     ctx.drawImage(fruitImage, fruit.x, fruit.y,boxSize, boxSize);
+
+    // Rita Power-up melonen
+    ctx.drawImage(powerMelonImage, powerMelonFruit.x, powerMelonFruit.y,boxSize, boxSize);
 }
 
 // Funktion för att kontrollera tangenttryckningar och ändra riktning
